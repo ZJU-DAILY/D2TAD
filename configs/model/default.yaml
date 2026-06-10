@@ -1,0 +1,9 @@
+name: default
+type: ddit
+hidden_size: 1024
+cond_dim: 64
+length: 51
+n_blocks: 12
+n_heads: 16
+scale_by_sigma: true
+dropout: 0.1

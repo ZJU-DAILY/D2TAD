@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
+tests/
+.hydra/
+outputs/
+multirun/
+data/
+checkpoints/
+checkpoints-meta/
+*.pth
+*.pt
+*.npy
+*.npz
+detection_scores*.csv

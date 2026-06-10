@@ -1,0 +1,82 @@
+defaults:
+  - _self_
+  - model: default
+
+ngpus: 1
+tokens: ${data.dataset_presets.${data.dataset_name}.tokens}
+
+training:
+  batch_size: 512
+  accum: 1
+  n_iters: 200000
+  snapshot_freq: 20000
+  log_freq: 2000
+  eval_freq: 4000
+  snapshot_freq_for_preemption: 2000
+  weight: standard
+  snapshot_sampling: false
+  ema: 0.9999
+
+data:
+  dataset_name: porto
+  train: proto
+  valid: proto
+  num_workers: 4
+  eos_token_id: ${data.dataset_presets.${data.dataset_name}.eos_token_id}
+  pad_token_id: ${data.dataset_presets.${data.dataset_name}.pad_token_id}
+  mask_eos_token: true
+  dataset_presets:
+    porto:
+      tokens: 6190
+      eos_token_id: 6188
+      pad_token_id: 6189
+      base_dir: data/porto
+      train_file: train_data_init.npy
+      valid_file: test_data_init.npy
+    chengdu:
+      tokens: 10754
+      eos_token_id: 10753
+      pad_token_id: 10752
+      base_dir: data/chengdu
+      train_file: train_data_init.npy
+      valid_file: test_data_init.npy
+  proto:
+    base_dir: ${data.dataset_presets.${data.dataset_name}.base_dir}
+    train_file: ${data.dataset_presets.${data.dataset_name}.train_file}
+    valid_file: ${data.dataset_presets.${data.dataset_name}.valid_file}
+
+graph:
+  type: absorb
+  transition_path: transitions.pt
+
+noise:
+  type: loglinear
+  sigma_min: 1e-4
+  sigma_max: 20
+
+sampling:
+  predictor: euler
+  steps: 1024
+  noise_removal: true
+
+eval:
+  batch_size: 512
+  perplexity: false
+  perplexity_batch_size: 512
+
+optim:
+  weight_decay: 0
+  optimizer: AdamW
+  lr: 1e-4
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1e-8
+  warmup: 5000
+  grad_clip: 1.0
+
+hydra:
+  run:
+    dir: outputs/${data.dataset_name}/${now:%Y.%m.%d}/${now:%H%M%S}
+  sweep:
+    dir: multirun/${data.dataset_name}/${now:%Y.%m.%d}/${now:%H%M%S}
+    subdir: ${hydra.job.num}
